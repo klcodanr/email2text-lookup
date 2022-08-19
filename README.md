@@ -29,7 +29,7 @@ As a CLI, first install:
 
 Then import and use:
 
-    import { lookupPhoneNumber, lookupEmail2Text } from "email2text-lookup/lookup";
+    import { lookupPhoneNumber, lookupEmail2Text } from "email2text-lookup";
 
     const client = new twilio(twilioSid, twilioSecret);
     let resolved = await lookupPhoneNumber(client, phoneNumber);

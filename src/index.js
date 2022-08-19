@@ -1,68 +1,25 @@
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
 import emailToPhone from "email-to-phone";
-import twilio from "twilio";
 
-import { lookupEmail2Text, lookupPhoneNumber } from "./lookup.js";
+/**
+ * Looks up the specified phone number using the twilio API
+ * @param {TwilioClient} client the client to use to connect to twilio
+ * @param {string} number the number to lookup
+ */
+export async function lookupPhoneNumber(client, number) {
+  return client.lookups.phoneNumbers(number).fetch({ type: ["carrier"] });
+}
 
-yargs(hideBin(process.argv))
-  .command(
-    "$0 <number>",
-    "Looks an email2text address using Twilio",
-    (yargsOp) => {
-      return yargsOp
-        .option("sid", { description: "the Twilio account SID" })
-        .option("secret", { description: "the Twilio account secret" })
-        .option("format", {
-          description: "The format for the output to be written to console",
-          default: "json",
-          choices: ["json", "text"],
-        })
-        .option("method", {
-          description: "The lookup method, e.g. to prefer / request mms or sms",
-          default: "sms",
-          choices: ["sms", "mms", "sms_mms", "mms_sms"],
-        });
-    },
-    async (argv) => {
-      const sid = argv.sid || process.env.TWILIO_SID;
-      if (!sid) {
-        throw new Error(
-          `Twilio Account SID is required, either supply in the env TWILIO_SID or via the option --sid`
-        );
-      }
-      const secret = argv.secret || process.env.TWILIO_SECRET;
-      if (!secret) {
-        throw new Error(
-          `Twilio Account Secret is required, either supply in the env TWILIO_SECRET or via the option --secret`
-        );
-      }
-
-      const method = emailToPhone[argv.method];
-
-      const client = new twilio(sid, secret);
-
-      let phoneNumber;
-      try {
-        phoneNumber = await lookupPhoneNumber(client, argv.number);
-      } catch (err) {
-        console.error(`Failed to look up phone number: ${argv.number}`, err);
-        throw new Error(`Failed to look up phone number: ${argv.number}`);
-      }
-
-      const email2Text = lookupEmail2Text(
-        argv.number,
-        phoneNumber.carrier.name,
-        method
-      );
-
-      if (argv.format === "text") {
-        process.stdout.write(email2Text + "\n");
-      } else {
-        phoneNumber[argv.method] = email2Text;
-        process.stdout.write(JSON.stringify(phoneNumber) + "\n");
-      }
-    }
-  )
-  .demandCommand(1)
-  .parse();
+/**
+ * Finds the email2text address for the specified phone number and carrier
+ * @param {string} phoneNumber the phone number for which to find the email2text address
+ * @param {string} carrerName the carrier name for the phone number
+ * @param {(carrerName: any, phoneNumber: any) => string | null} method the method on emailToPhone to call
+ * @returns the email address or null if the lookup fails
+ */
+export function lookupEmail2Text(
+  phoneNumber,
+  carrerName,
+  method = emailToPhone.sms
+) {
+  return method(carrerName, phoneNumber);
+}

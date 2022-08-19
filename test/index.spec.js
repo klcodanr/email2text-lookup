@@ -1,99 +1,33 @@
 import "dotenv/config";
 import { describe, it } from "mocha";
-import { execSync } from "child_process";
 import { expect } from "chai";
-import { fail } from "assert";
+
+import { lookupPhoneNumber, lookupEmail2Text } from "../src/index.js";
+import twilio from "twilio";
 
 const knownGood = process.env.TEST_KNOWN_GOOD_NUMBER;
 const expectedEmail2SMS = process.env.TEST_EXPECTED_EMAIL2SMS;
-const expectedEmail2MMS = process.env.TEST_EXPECTED_EMAIL2MMS;
 
-describe("cli", () => {
-  describe("sad path tests", () => {
-    it("requires phone number", () => {
-      try {
-        execSync("node_modules/dotenv-cli/cli.js -e .env -- node .");
-        fail();
-      } catch (error) {
-        expect(error.message).to.contain(
-          "Not enough non-option arguments: got 0, need at least 1"
-        );
-      }
-    });
-    it("requires valid method", () => {
-      try {
-        execSync(
-          `node_modules/dotenv-cli/cli.js -e .env -- node . ${knownGood} --method=notreal`
-        );
-        fail();
-      } catch (error) {
-        expect(error.message).to.contain(
-          'Argument: method, Given: "notreal", Choices:'
-        );
-      }
-    });
-    it("Fails on invalid number", () => {
-      try {
-        execSync(`node_modules/dotenv-cli/cli.js -e .env -- node . 777`);
-        fail();
-      } catch (error) {
-        expect(error.message).to.contain("Failed to look up phone number: 777");
-      }
-    });
-    it("requires twilio auth", () => {
-      const sid = process.env.TWILIO_SID;
-      try {
-        process.env.TWILIO_SID = null;
-        const res = execSync(
-          `node_modules/dotenv-cli/cli.js -e .envnoauth -- node . ${knownGood}`
-        );
-        console.log(res.toString());
-        fail("Did not get expected exception");
-      } catch (error) {
-        expect(error.message).to.contain("accountSid must start with AC");
-      } finally {
-        process.env.TWILIO_SID = sid;
-      }
-    });
-  });
+describe("import", () => {
   describe("happy path tests", () => {
-    it("can retrieve mms", () => {
-      const res = execSync(
-        `node_modules/dotenv-cli/cli.js -e .env -- node . ${knownGood} --method=mms`
+    it("can lookup phone number", async () => {
+      const client = new twilio(
+        process.env.TWILIO_SID,
+        process.env.TWILIO_SECRET
       );
-      expect(res).to.not.be.null;
-      const parsed = JSON.parse(res);
-      expect(parsed["mms"]).to.eq(expectedEmail2MMS);
+      let phoneNumber = await lookupPhoneNumber(client, knownGood);
+      expect(phoneNumber).to.not.be.null;
+      expect(phoneNumber.phoneNumber).to.not.be.null;
     });
-    it("can retrieve sms", () => {
-      const res = execSync(
-        `node_modules/dotenv-cli/cli.js -e .env -- node . ${knownGood}`
+
+    it("can lookup email2sms", async () => {
+      const client = new twilio(
+        process.env.TWILIO_SID,
+        process.env.TWILIO_SECRET
       );
-      expect(res).to.not.be.null;
-      const parsed = JSON.parse(res);
-      expect(parsed["sms"]).to.eq(expectedEmail2SMS);
-    });
-    it("can prefer mms", () => {
-      const res = execSync(
-        `node_modules/dotenv-cli/cli.js -e .env -- node . ${knownGood} --method=mms_sms`
-      );
-      expect(res).to.not.be.null;
-      const parsed = JSON.parse(res);
-      expect(parsed["mms_sms"]).to.eq(expectedEmail2MMS);
-    });
-    it("can prefer sms", () => {
-      const res = execSync(
-        `node_modules/dotenv-cli/cli.js -e .env -- node . ${knownGood} --method=sms_mms`
-      );
-      expect(res).to.not.be.null;
-      const parsed = JSON.parse(res);
-      expect(parsed["sms_mms"]).to.eq(expectedEmail2SMS);
-    });
-    it("can request text output", () => {
-      const res = execSync(
-        `node_modules/dotenv-cli/cli.js -e .env -- node . ${knownGood} --method=sms_mms --format=text`
-      );
-      expect(res.toString()).to.eq(expectedEmail2SMS + "\n");
+      let phoneNumber = await lookupPhoneNumber(client, knownGood);
+      const email2Text = lookupEmail2Text(knownGood, phoneNumber.carrier.name);
+      expect(email2Text).to.eq(expectedEmail2SMS);
     });
   });
 });
