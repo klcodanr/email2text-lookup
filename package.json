@@ -1,6 +1,6 @@
 {
   "name": "email2text-lookup",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Look up Email2Text address using Twilio",
   "main": "src/index.js",
   "scripts": {
