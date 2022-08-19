@@ -29,3 +29,9 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
+      env:
+        TWILIO_SID: ${{ secrets.TWILIO_SID }}
+        TWILIO_SECRET: ${{ secrets.TWILIO_SECRET }}
+        TEST_KNOWN_GOOD_NUMBER: ${{ secrets.TEST_KNOWN_GOOD_NUMBER }}
+        TEST_EXPECTED_EMAIL2SMS: ${{ secrets.TEST_EXPECTED_EMAIL2SMS }}
+        TEST_EXPECTED_EMAIL2MMS: ${{ secrets.TEST_EXPECTED_EMAIL2MMS }}
