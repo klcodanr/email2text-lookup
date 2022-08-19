@@ -4,6 +4,7 @@
   "description": "Look up Email2Text address using Twilio",
   "main": "src/index.js",
   "scripts": {
+    "release": "npx np",
     "test": "node_modules/c8/bin/c8.js node_modules/mocha/bin/mocha.js test/*.spec.js"
   },
   "type": "module",
