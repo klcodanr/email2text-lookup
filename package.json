@@ -1,0 +1,25 @@
+{
+  "name": "email2text-lookup",
+  "version": "1.0.0",
+  "description": "Look up Email2Text address using Twilio",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node_modules/c8/bin/c8.js node_modules/mocha/bin/mocha.js test/*.spec.js"
+  },
+  "type": "module",
+  "author": "Dan Klco <daniel.klco@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "email-to-phone": "^1.0.3",
+    "twilio": "^3.80.1",
+    "yargs": "^17.5.1"
+  },
+  "devDependencies": {
+    "c8": "^7.12.0",
+    "chai": "^4.3.6",
+    "dotenv-cli": "^6.0.0",
+    "mocha": "^10.0.0",
+    "nyc": "^15.1.0"
+  }
+}
