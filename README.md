@@ -1,3 +1,5 @@
+[![Node.js CI](https://github.com/klcodanr/email2text-lookup/actions/workflows/node.js.yml/badge.svg)](https://github.com/klcodanr/email2text-lookup/actions/workflows/node.js.yml)
+
 # Email2Text Lookup
 
 Looks up the email2text address using Twilio.
